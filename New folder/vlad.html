@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Portfolio</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      transition: background 0.5s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .navbar { 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08); 
+      background: rgba(255,255,255,0.9); 
+    }
+
+    .container {
+      animation: fadeIn 1.5s ease-in;
+      margin-top: 3rem;
+      margin-bottom: 3rem;
+      padding: 1rem;
+    }
+
+    /* Entry animation */
+    @keyframes cardEntry {
+      0% {
+        transform: scale(0) rotate(-30deg);
+        opacity: 0;
+        top: -200px; /* start above */
+        left: 50%;
+      }
+      60% {
+        transform: scale(1.1) rotate(10deg);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+    #floating-card.entry { animation: cardEntry 1.8s ease-out; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+    }
+    .card-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      border-radius: 15px 15px 0 0;
+      overflow: hidden;
+    }
+    .card-img-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("./Assets/cards.JPG") center/cover no-repeat;
+      z-index: 1;
+    }
+    .card-img-wrapper img {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
+    }
+    .card img { height: 200px; object-fit: contain; }
+
+    .social-buttons {
+      position: absolute;
+      top: 800px;           
+      left: 330px;          
+      display: flex;
+      gap: 20px;
+      z-index: 999;
+    }
+    .social-buttons a {
+      display: inline-block;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .social-buttons a:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .social-buttons a img.social-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Rope Floating Card */
+    #rope-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #projects-section {
+      background: url("./Assets/c1.jpg") center/cover no-repeat;
+      height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #projects-section .row {
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 2rem;
+    }
+    #projects-section .card {
+      min-width: 250px;
+      max-width: 300px;
+    }
+
+    #floating-card {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 15px;
+      overflow: hidden;
+      cursor: grab;
+      pointer-events: auto;
+      z-index: 10;
+      transition: box-shadow 0.2s;
+    }
+    #floating-card:active {
+      cursor: grabbing;
+      box-shadow: 0 16px 32px rgba(0,0,0,0.3);
+    }
+    #floating-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #rope-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    /* Modal card size */
+    .modal-card-size .modal-dialog {
+      max-width: 320px;
+      margin: auto;
+    }
+    .modal-card-size .modal-body img {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body style="background-image: url('./Assets/ba1.png');">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light px-4">
+    <a href="#" class="navbar-brand fw-bold">MyPortfolio</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <div class="navbar-nav">
+        <a href="#" id="nav-home" class="nav-item nav-link active">Home</a>
+        <a href="#" id="nav-portfolio" class="nav-item nav-link">Portfolio</a>
+        <a href="#" id="nav-projects" class="nav-item nav-link">Projects</a>
+        <a href="#" id="nav-contact" class="nav-item nav-link">Contact Me</a>
+      </div>
+      <div class="navbar-nav ms-auto">
+        <a href="#" class="nav-item nav-link">Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Floating Rope Card -->
+  <div id="rope-container">
+    <canvas id="rope-canvas"></canvas>
+    <div id="floating-card">
+      <img src="./Assets/float.jpg" alt="Floating Card">
+    </div>
+  </div>
+
+  <!-- Projects Section -->
+  <section id="projects-section" class="container my-5 d-none">
+    <h2 class="text-center fw-bold mb-4">My Projects</h2>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+      <div class="col">
+        <div class="card h-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectModal1">
+          <div class="card-img-wrapper"><img src="./Assets/high.jfif" alt="Project 1"></div>
+          <div class="card-body text-center"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card h-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectModal2">
+          <div class="card-img-wrapper"><img src="./Assets/lucky9.jfif" alt="Project 2"></div>
+          <div class="card-body text-center"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card h-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#projectModal3">
+          <div class="card-img-wrapper"><img src="./Assets/inbet1.jfif" alt="Project 3"></div>
+          <div class="card-body text-center"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- Portfolio 3 Modals -->
+<div class="modal fade" id="portfolio3Modal1" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/bball.JPG" alt="Portfolio 3 - Card 1" style="width:60%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="portfolio3Modal2" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/motor1.jpg" alt="Portfolio 3 - Card 2" style="width:60%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Portfolio 4 Modals -->
+<div class="modal fade" id="portfolio4Modal1" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/codes.jfif" alt="Portfolio 4 - Card 1" style="width:100%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="portfolio4Modal2" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/embm.jfif" alt="Portfolio 4 - Card 2" style="width:100%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Portfolio 5 Modals -->
+<div class="modal fade" id="portfolio5Modal1" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/BUSI.jpg" alt="Portfolio 5 - Card 1" style="width:60%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="portfolio5Modal2" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img src="./Assets/lalamovwe.png" alt="Portfolio 5 - Card 2" style="width:100%; height:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Modals (Card-sized) -->
+  <!-- Modal 1 -->
+  <div class="modal fade modal-card-size" id="projectModal1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Higher or Lower</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="./Assets/hight.jpg" alt="Project 1">
+          <p>The game is simple; players have to guess whether each dice drawn is higher or lower than the previous dice. If they guess all the cards in sequence they win a prize! If the game is played at home, it can be adjusted so that players earn points for each correct guess and must restart if they guessed incorrectly..</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2 -->
+  <div class="modal fade modal-card-size" id="projectModal2" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Inbetween</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="./Assets/inbet22.jpg" alt="Project 2">
+          <p>Players must always bet one chip at a minimum and can bet up to an amount equal to the chips in the middle pot at maximum. If the next card flipped is ranked between the two face up cards, the player will win the amount bet out from the middle pot. If not, the player loses their bet to the middle pot..</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3 -->
+  <div class="modal fade modal-card-size" id="projectModal3" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Lucky9</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img src="./Assets/inbet22.jpg" alt="Project 3">
+          <p>The object of the game is to beat the dealer with a higher valued hand as close to 9 as possible. Tens and face cards are worth 0 points, aces are worth 1 point, and 2-9 are scored at face value. Hands are valued as the last digit of their sum. Lucky 9 also includes optional bonus and progressive wagers..</p>
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- Portfolio Section (Fullscreen Image, Scrollable) -->
+<section id="portfolio-section" class="d-none" style="width:100%; height:100vh; overflow-y:auto;">
+  <h2 class="text-center fw-bold mb-4">My Portfolio</h2>
+  <div style="width:100%; height:100%; display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Portfolio 1 -->
+    <img src="./Assets/11.png" alt="Portfolio 1" style="width:100%; height:100vh; object-fit:cover;">
+
+    <!-- Portfolio 2 -->
+    <img src="./Assets/12.png" alt="Portfolio 2" style="width:100%; height:100vh; object-fit:cover;">
+
+    <!-- Portfolio 3 (with 2 cards + background image) -->
+<div style="width:100%; height:100vh; position:relative;">
+  <img src="./Assets/hobby.png" alt="Portfolio 3" style="width:100%; height:100%; object-fit:cover;">
+
+  <!-- Card 1 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:30%; left:30%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio3Modal1">
+    <img src="./Assets/bola.png" class="card-img-top" alt="Portfolio 3 - Card 1">
+    <div class="card-body text-center"><h6>basketball</h6></div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:50%; left:60%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio3Modal2">
+    <img src="./Assets/motor.JPG" class="card-img-top" alt="Portfolio 3 - Card 2">
+    <div class="card-body text-center"><h6>Rides</h6></div>
+  </div>
+</div>
+
+<!-- Portfolio 4 (with 2 cards + background image) -->
+<div style="width:100%; height:100vh; position:relative;">
+  <img src="./Assets/ski.png" alt="Portfolio 4" style="width:100%; height:100%; object-fit:cover;">
+
+  <!-- Card 1 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:40%; left:20%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio4Modal1">
+    <img src="./Assets/laptop.JPG" class="card-img-top" alt="Portfolio 4 - Card 1">
+    <div class="card-body text-center"><h6>SOFTWARE</h6></div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:30%; left:70%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio4Modal2">
+    <img src="./Assets/emb.jpg" class="card-img-top" alt="Portfolio 4 - Card 2">
+    <div class="card-body text-center"><h6>HARDWARE</h6></div>
+  </div>
+</div>
+
+<!-- Portfolio 5 (with 2 cards + background image) -->
+<div style="width:100%; height:100vh; position:relative;">
+  <img src="./Assets/expe.png" alt="Portfolio 5" style="width:100%; height:100%; object-fit:cover;">
+
+  <!-- Card 1 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:30%; left:28%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio5Modal1">
+    <img src="./Assets/cof.JPG" class="card-img-top" alt="Portfolio 5 - Card 1">
+    <div class="card-body text-center"><h6>start coffee business</h6></div>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="card shadow-sm"
+       style="width:250px; cursor:pointer; position:absolute; top:40%; left:60%;"
+       data-bs-toggle="modal" data-bs-target="#portfolio5Modal2">
+    <img src="./Assets/motor.JPG" class="card-img-top" alt="Portfolio 5 - Card 2">
+    <div class="card-body text-center"><h6>lalamove rider</h6></div>
+  </div>
+</div>
+  </div>
+</section>
+
+
+
+  <!-- Contact Section -->
+  <section id="contact-section" class="container my-5 d-none">
+    <h2 class="text-center fw-bold mb-4">Contact Me</h2>
+    <form class="mx-auto" style="max-width: 500px;">
+      <div class="mb-3"><label class="form-label">Name</label><input type="text" class="form-control" placeholder="Your Name"></div>
+      <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" placeholder="Your Email"></div>
+      <div class="mb-3"><label class="form-label">Message</label><textarea class="form-control" rows="4" placeholder="Your Message"></textarea></div>
+      <button type="submit" class="btn btn-primary w-100">Send</button>
+    </form>
+  </section>
+
+  <!-- Social Buttons -->
+  <div class="social-buttons" id="social-buttons">
+    <a href="https://www.facebook.com/vladimir.lope" target="_blank"><img src="./Assets/facebook.png" alt="Facebook" class="social-icon"></a>
+    <a href="https://www.instagram.com/rimii_v/" target="_blank"><img src="./Assets/instagram.png" alt="Instagram" class="social-icon"></a>
+    <a href="https://www.tiktok.com/@rimidalv_f?_t=ZS-8ycIHn9YeBN&_r=1" target="_blank"><img src="./Assets/tiktok.png" alt="TikTok" class="social-icon"></a>
+  </div>
+
+  <script>
+    // Navbar sections
+    const sections = {
+      projects: document.getElementById('projects-section'),
+      portfolio: document.getElementById('portfolio-section'),
+      contact: document.getElementById('contact-section')
+    };
+    const navLinks = {
+      home: document.getElementById('nav-home'),
+      portfolio: document.getElementById('nav-portfolio'),
+      projects: document.getElementById('nav-projects'),
+      contact: document.getElementById('nav-contact')
+    };
+    const socialButtons = document.getElementById('social-buttons');
+    const ropeContainer = document.getElementById('rope-container');
+
+    const sectionBackgrounds = {
+      home: './Assets/ba1.png',
+      projects: './Assets/blank.png',
+      portfolio: './Assets/blank.png',
+      contact: './Assets/blank.png'
+    };
+
+    function showSection(section) {
+      for (let key in sections) {
+        sections[key].classList.add('d-none');
+        if (navLinks[key]) navLinks[key].classList.remove('active');
+      }
+      if(section === ''){
+        socialButtons.style.display = 'flex';
+        ropeContainer.style.display = 'block';
+        document.body.style.backgroundImage = `url(${sectionBackgrounds.home})`;
+      } else {
+        socialButtons.style.display = 'none';
+        ropeContainer.style.display = 'none';
+        document.body.style.backgroundImage = `url(${sectionBackgrounds[section]})`;
+      }
+      if (sections[section]) sections[section].classList.remove('d-none');
+      if (navLinks[section]) navLinks[section].classList.add('active');
+    }
+
+    navLinks.home.addEventListener('click', e => { e.preventDefault(); showSection(''); });
+    navLinks.portfolio.addEventListener('click', e => { e.preventDefault(); showSection('portfolio'); });
+    navLinks.projects.addEventListener('click', e => { e.preventDefault(); showSection('projects'); });
+    navLinks.contact.addEventListener('click', e => { e.preventDefault(); showSection('contact'); });
+
+    // Rope Floating Card Physics (unchanged)
+    const canvas = document.getElementById('rope-canvas');
+    const ctx = canvas.getContext('2d');
+    const card = document.getElementById('floating-card');
+
+    let ropeStart = { x: window.innerWidth * .715, y: 120 }; 
+    let ropeLength = 410;
+
+    let cardPos = { x: ropeStart.x - 100, y: ropeStart.y + 10 };
+    let velocity = { x: 0, y: 0 };
+    let isDragging = false;
+    let offset = { x: 0, y: 0 };
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    card.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      offset.x = e.clientX - cardPos.x;
+      offset.y = e.clientY - cardPos.y;
+    });
+    window.addEventListener('load', () => {
+      card.classList.add('entry');
+      setTimeout(() => { card.classList.remove('entry'); }, 1800);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if(isDragging){
+        cardPos.x = e.clientX - offset.x;
+        cardPos.y = e.clientY - offset.y;
+      }
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    function updateCardPhysics() {
+      if(!isDragging){
+        let dx = ropeStart.x - (cardPos.x + 100);
+        let dy = (ropeStart.y + ropeLength) - cardPos.y;
+        let spring = 0.02;
+        let damping = 0.88;
+        velocity.x += dx * spring;
+        velocity.y += dy * spring;
+        velocity.y += 0.5; // gravity
+        velocity.x *= damping;
+        velocity.y *= damping;
+        cardPos.x += velocity.x;
+        cardPos.y += velocity.y;
+      }
+      card.style.left = cardPos.x + 'px';
+      card.style.top = cardPos.y + 'px';
+    }
+
+    function drawRope(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(ropeStart.x, ropeStart.y);
+      const dx = cardPos.x + 100 - ropeStart.x;
+      const dy = cardPos.y - ropeStart.y;
+      const distance = Math.sqrt(dx*dx + dy*dy);
+      const cp1x = ropeStart.x + dx * 0.25;
+      const cp1y = ropeStart.y + dy * 0.15 + distance*0.05;
+      const cp2x = ropeStart.x + dx * 0.75;
+      const cp2y = ropeStart.y + dy * 0.3 + distance*0.05;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, cardPos.x + 100, cardPos.y);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    function animate(){
+      if(ropeContainer.style.display !== 'none'){
+        updateCardPhysics();
+        drawRope();
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ropeStart.x = window.innerWidth * 0.75;
+      cardPos.x = ropeStart.x - 100;
+      cardPos.y = ropeStart.y + 50;
+      velocity = { x: 0, y: 0 };
+    });
+    setTimeout(() => {
+      card.classList.remove('entry');
+      velocity = { x: 0, y: 0 };
+    }, 1800);
+  </script>
+</body>
+</html>
